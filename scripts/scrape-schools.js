@@ -67,6 +67,11 @@ const highSchoolsRaw = [
   "Walter Murray Collegiate *",
 ];
 
+const urlOverrides = {
+  "Brevoort Park School": "brevoort",
+  "Estey School": "esteyschool",
+};
+
 const removeGeneralWords = (name) =>
   name
     .replace(/^école|^ecole/gi, "") // remove 'École' or 'Ecole' at the start
@@ -112,7 +117,7 @@ async function scrapeManualSchools(browser) {
   const page = await browser.newPage();
   for (const raw of elementarySchoolsRaw) {
     const name = cleanName(raw);
-    const urlSegment = removeGeneralWords(name);
+    const urlSegment = urlOverrides[name] || removeGeneralWords(name);
     const url = `https://www.spsd.sk.ca/school/${urlSegment}/Contact/Pages/default.aspx#/=`;
     const frenchStatus = getFrenchStatus(raw);
     const details = await getContactDetails(page, url);
@@ -129,7 +134,7 @@ async function scrapeManualSchools(browser) {
   }
   for (const raw of highSchoolsRaw) {
     const name = cleanName(raw);
-    const urlSegment = removeGeneralWords(name);
+    const urlSegment = urlOverrides[name] || removeGeneralWords(name);
     const url = `https://www.spsd.sk.ca/school/${urlSegment}/Contact/Pages/default.aspx#/=`;
     const frenchStatus = getFrenchStatus(raw);
     const details = await getContactDetails(page, url);
