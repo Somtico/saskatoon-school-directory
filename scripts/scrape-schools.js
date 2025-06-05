@@ -4,126 +4,144 @@ const ExcelJS = require("exceljs");
 // Helper function to add delay between requests
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const elementarySchoolsRaw = [
-  "École Alvin Buckwold School *",
-  "John Lake School",
-  "Brevoort Park School",
-  "King George Community School",
-  "Brownell School",
-  "Lakeridge School",
-  "Brunskill School",
-  "École Lakeview School *",
-  "Buena Vista School",
-  "Lawson Heights School",
-  "Caroline Robins Community School",
-  "Lester B. Pearson School",
-  "Caswell Community School",
-  "Mayfair Community School",
-  "Charles Red Hawk Elementary School",
-  "Montgomery School",
-  "Chief Whitecap School",
-  "North Park Wilson School",
-  "City Park School",
-  "Prince Philip School",
-  "Colette Bourgonje School",
-  "Queen Elizabeth School",
-  "École College Park School *",
-  "École River Heights School *",
-  "Dr. John G. Egnatoff School",
-  "Roland Michener School",
-  "École Dundonald School *",
-  "École Silverspring School *",
-  "Ernest Lindner School",
-  "Silverwood Heights School",
-  "Fairhaven School",
-  "Sutherland Community School",
-  "École Forest Grove School *",
-  "Sylvia Fedoruk School",
-  "Greystone Heights School",
-  "École Victoria School **",
-  "École Henry Kelsey School **",
-  "Vincent Massey Community School",
-  "Holliston School",
-  "wâhkôhtowin Community School",
-  "Howard Coad Community School",
-  "Westmount Community School",
-  "Hugh Cairns School",
-  "Wildwood School",
-  "James L. Alexander School",
-  "Willowgrove School",
-  "John Dolan School",
-  "W.P. Bate Community School",
-];
-const highSchoolsRaw = [
-  "Aden Bowman Collegiate",
-  "Marion M. Graham Collegiate *",
-  "Bedford Road Collegiate",
-  "Mount Royal Collegiate",
-  "Centennial Collegiate *",
-  "Nutana Collegiate",
-  "Estey School",
-  "Tommy Douglas Collegiate *",
-  "Evan Hardy Collegiate",
-  "Walter Murray Collegiate *",
+const catholicSchools = [
+  "Bethlehem Catholic High School",
+  "Bishop Filevich Ukrainian Bilingual School",
+  "Bishop James Mahoney High School",
+  "Bishop Klein Community School",
+  "Bishop Murray High School",
+  "Bishop Pocock School",
+  "Bishop Roborecki Community School",
+  "Cyber School",
+  "E. D. Feehan Catholic High School",
+  "École Cardinal Leger School",
+  "École Father Robinson School",
+  "École française de Saskatoon",
+  "École Holy Mary Catholic School",
+  "École Sister O'Brien School",
+  "École St. Gerard School",
+  "École St. Luke School",
+  "École St. Matthew School",
+  "École St. Mother Teresa School",
+  "École St. Paul School",
+  "École St. Peter School",
+  "Father Vachon School",
+  "Georges Vanier Catholic Fine Arts School",
+  "Holy Cross High School",
+  "Holy Family Catholic School",
+  "Holy Trinity Catholic School",
+  "International Student Program",
+  "Oskāyak High School",
+  "Pope John Paul II School",
+  "St. Angela School",
+  "St. Anne School",
+  "St. Augustine School",
+  "St. Augustine School - Humboldt",
+  "St. Bernard School",
+  "St. Dominic School",
+  "St. Dominic School - Humboldt",
+  "St. Edward School",
+  "St. Frances Cree Bilingual School – Bateman",
+  "St. Frances Cree Bilingual School - McPherson",
+  "St. Gabriel Biggar",
+  "St. George School",
+  "St. John Community School",
+  "St. Joseph High School",
+  "St. Kateri Tekakwitha Catholic School",
+  "St. Lorenzo Ruiz Catholic School",
+  "St. Marguerite School",
+  "St. Maria Goretti Community School",
+  "St. Mark Community School",
+  "St. Mary's Wellness and Education Centre",
+  "St. Michael Community School",
+  "St. Nicholas Catholic School",
+  "St. Philip School",
+  "St. Thérèse of Lisieux Catholic School",
+  "St. Volodymyr School",
 ];
 
 const urlOverrides = {
-  "Brevoort Park School": "brevoort",
-  "Estey School": "esteyschool",
+  "École française de Saskatoon": "french",
+  "St. Frances Cree Bilingual School – Bateman": "frances-bateman",
+  "St. Frances Cree Bilingual School - McPherson": "frances-mcpherson",
+  "St. Mary's Wellness and Education Centre": "stmarys",
 };
 
 const removeGeneralWords = (name) =>
   name
     .replace(/^école|^ecole/gi, "") // remove 'École' or 'Ecole' at the start
-    .replace(/school|community|collegiate|elementary/gi, "")
+    .replace(/school|community|collegiate|elementary|high|centre|center/gi, "")
     .replace(/\s+/g, "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "") // remove accents
     .replace(/[^a-zA-Z0-9]/g, "")
     .toLowerCase();
 
-const getFrenchStatus = (name) => {
-  if (/\*\*/.test(name)) return "French Immersion only";
-  if (/\*/.test(name)) return "English and French";
-  return "English only";
+const getSchoolType = (name) => {
+  if (name.toLowerCase().includes("high")) return "High School";
+  if (name.toLowerCase().includes("cyber")) return "Online";
+  if (name.toLowerCase().includes("international")) return "Special Program";
+  return "Elementary";
 };
 
-const cleanName = (name) => name.replace(/\*+/g, "").trim();
+const getFrenchStatus = (name) => {
+  if (name.toLowerCase().includes("french")) return "French Immersion";
+  if (name.toLowerCase().includes("bilingual")) return "Bilingual";
+  return "English";
+};
 
 async function getContactDetails(page, url) {
   try {
     await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
     await delay(1000);
-    // Extract address, phone, email using the provided HTML structure
+
+    // Extract contact information from the page
     const details = await page.evaluate(() => {
       const getText = (selector) => {
         const el = document.querySelector(selector);
         return el ? el.textContent.trim().replace(/\s+/g, " ") : "";
       };
-      return {
-        address: getText(".address"),
-        phone: getText(".phone"),
-        email: getText(".email"),
-      };
+
+      // Try different possible selectors for contact information
+      const address =
+        getText(".address") ||
+        getText("[itemprop='address']") ||
+        getText(".contact-address");
+      const phone =
+        getText(".phone") ||
+        getText("[itemprop='telephone']") ||
+        getText(".contact-phone");
+      const email =
+        getText(".email") ||
+        getText("[itemprop='email']") ||
+        getText(".contact-email");
+
+      return { address, phone, email };
     });
+
     return details;
   } catch (e) {
+    console.error(`Error getting contact details for ${url}:`, e);
     return { address: "", phone: "", email: "" };
   }
 }
 
-async function scrapeManualSchools(browser) {
+async function scrapeCatholicSchools(browser) {
   const schools = [];
   const page = await browser.newPage();
-  for (const raw of elementarySchoolsRaw) {
-    const name = cleanName(raw);
+
+  for (const name of catholicSchools) {
     const urlSegment = urlOverrides[name] || removeGeneralWords(name);
-    const url = `https://www.spsd.sk.ca/school/${urlSegment}/Contact/Pages/default.aspx#/=`;
-    const frenchStatus = getFrenchStatus(raw);
+    const url = `https://www.gscs.ca/${urlSegment}`;
+    const schoolType = getSchoolType(name);
+    const frenchStatus = getFrenchStatus(name);
+
+    console.log(`Scraping ${name}...`);
     const details = await getContactDetails(page, url);
+
     schools.push({
-      Type: "Elementary",
-      Category: "Public",
+      Type: schoolType,
+      Category: "Catholic",
       "French Status": frenchStatus,
       Name: name,
       Address: details.address,
@@ -131,37 +149,24 @@ async function scrapeManualSchools(browser) {
       Phone: details.phone,
       Email: details.email,
     });
+
+    // Add a delay between requests to be respectful to the server
+    await delay(2000);
   }
-  for (const raw of highSchoolsRaw) {
-    const name = cleanName(raw);
-    const urlSegment = urlOverrides[name] || removeGeneralWords(name);
-    const url = `https://www.spsd.sk.ca/school/${urlSegment}/Contact/Pages/default.aspx#/=`;
-    const frenchStatus = getFrenchStatus(raw);
-    const details = await getContactDetails(page, url);
-    schools.push({
-      Type: "High School",
-      Category: "Public",
-      "French Status": frenchStatus,
-      Name: name,
-      Address: details.address,
-      URL: url,
-      Phone: details.phone,
-      Email: details.email,
-    });
-  }
+
   await page.close();
   return schools;
 }
 
 async function main() {
-  console.log("Starting to scrape school data...");
+  console.log("Starting to scrape Catholic school data...");
   const browser = await puppeteer.launch({
     headless: "new",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   try {
-    const schools = await scrapeManualSchools(browser);
+    const schools = await scrapeCatholicSchools(browser);
 
     // Save to Excel
     const workbook = new ExcelJS.Workbook();
@@ -183,7 +188,7 @@ async function main() {
     worksheet.addRows(schools);
 
     // Save the file
-    const outputPath = "schools.xlsx";
+    const outputPath = "catholic-schools.xlsx";
     await workbook.xlsx.writeFile(outputPath);
 
     console.log(`Successfully scraped ${schools.length} schools`);
