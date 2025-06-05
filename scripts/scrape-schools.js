@@ -116,15 +116,14 @@ async function scrapeManualSchools(browser) {
     const frenchStatus = getFrenchStatus(raw);
     const details = await getContactDetails(page, url);
     schools.push({
-      Name: name,
       Type: "Elementary",
       Category: "Public",
       "French Status": frenchStatus,
+      Name: name,
       Address: details.address,
+      URL: url,
       Phone: details.phone,
       Email: details.email,
-      URL: url,
-      Principal: "",
     });
   }
   for (const raw of highSchoolsRaw) {
@@ -134,15 +133,14 @@ async function scrapeManualSchools(browser) {
     const frenchStatus = getFrenchStatus(raw);
     const details = await getContactDetails(page, url);
     schools.push({
-      Name: name,
       Type: "High School",
       Category: "Public",
       "French Status": frenchStatus,
+      Name: name,
       Address: details.address,
+      URL: url,
       Phone: details.phone,
       Email: details.email,
-      URL: url,
-      Principal: "",
     });
   }
   await page.close();
