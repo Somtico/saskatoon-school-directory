@@ -65,6 +65,7 @@ const urlOverrides = {
   "St. Frances Cree Bilingual School – Bateman": "frances-bateman",
   "St. Frances Cree Bilingual School - McPherson": "frances-mcpherson",
   "St. Mary's Wellness and Education Centre": "stmarys",
+  "St. Thérèse of Lisieux Catholic School": "sttherese",
 };
 
 const removeGeneralWords = (name) =>
@@ -92,8 +93,9 @@ const getFrenchStatus = (name) => {
 
 async function getContactDetails(page, url) {
   try {
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
-    await delay(1000);
+    // Wait for the page to be ready
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await delay(2000); // Give extra time for dynamic content to load
 
     // Extract contact information from the page
     const details = await page.evaluate(() => {
@@ -106,15 +108,18 @@ async function getContactDetails(page, url) {
       const address =
         getText(".address") ||
         getText("[itemprop='address']") ||
-        getText(".contact-address");
+        getText(".contact-address") ||
+        getText(".school-address");
       const phone =
         getText(".phone") ||
         getText("[itemprop='telephone']") ||
-        getText(".contact-phone");
+        getText(".contact-phone") ||
+        getText(".school-phone");
       const email =
         getText(".email") ||
         getText("[itemprop='email']") ||
-        getText(".contact-email");
+        getText(".contact-email") ||
+        getText(".school-email");
 
       return { address, phone, email };
     });
@@ -130,9 +135,12 @@ async function scrapeCatholicSchools(browser) {
   const schools = [];
   const page = await browser.newPage();
 
+  // Set a longer timeout for navigation
+  page.setDefaultNavigationTimeout(60000);
+
   for (const name of catholicSchools) {
     const urlSegment = urlOverrides[name] || removeGeneralWords(name);
-    const url = `https://www.gscs.ca/${urlSegment}`;
+    const url = `https://www.gscs.ca/schools/${urlSegment}`;
     const schoolType = getSchoolType(name);
     const frenchStatus = getFrenchStatus(name);
 
@@ -151,7 +159,7 @@ async function scrapeCatholicSchools(browser) {
     });
 
     // Add a delay between requests to be respectful to the server
-    await delay(2000);
+    await delay(3000);
   }
 
   await page.close();
@@ -160,12 +168,14 @@ async function scrapeCatholicSchools(browser) {
 
 async function main() {
   console.log("Starting to scrape Catholic school data...");
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+  let browser;
 
   try {
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+
     const schools = await scrapeCatholicSchools(browser);
 
     // Save to Excel
@@ -195,10 +205,25 @@ async function main() {
     console.log(`Data saved to ${process.cwd()}/${outputPath}`);
   } catch (error) {
     console.error("Error:", error);
+    process.exit(1); // Exit with error code
   } finally {
-    await browser.close();
-    process.exit(0);
+    if (browser) {
+      await browser.close();
+    }
+    process.exit(0); // Exit with success code
   }
 }
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
+});
 
 main();
