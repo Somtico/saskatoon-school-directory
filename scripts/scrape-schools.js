@@ -10,110 +10,115 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir);
 }
 
+// Helper function to add delay between requests
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function scrapePublicSchools(page) {
   console.log("Scraping public schools...");
   const schools = [];
 
   try {
-    await page.goto("https://www.spsd.sk.ca/Schools/Pages/default.aspx#/=", {
-      waitUntil: "networkidle0",
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    );
+    await page.setExtraHTTPHeaders({
+      "Accept-Language": "en-US,en;q=0.9",
+      Accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     });
 
-    // Wait for the school tables to load
-    await page.waitForSelector(".ms-rteTable-1");
+    await page.goto("https://www.spsd.sk.ca/Schools/Pages/default.aspx", {
+      waitUntil: "networkidle0",
+      timeout: 60000,
+    });
 
-    // Get all school tables (elementary and secondary)
-    const tables = await page.$$(".ms-rteTable-1");
+    await page.waitForSelector(".ms-rteTable-1", { timeout: 30000 });
 
-    for (const table of tables) {
-      // Get all school cells from the table
-      const schoolCells = await table.$$("td");
-
-      for (const cell of schoolCells) {
-        try {
-          // Get the school link
-          const linkElement = await cell.$("a");
-          if (!linkElement) continue;
-
-          const name = await page.evaluate(
-            (el) => el.textContent.trim(),
-            linkElement
-          );
-          const url = await page.evaluate((el) => el.href, linkElement);
-
-          // Determine if it's a high school based on the table context
-          const isHighSchool = await page.evaluate((table) => {
-            const tableText = table.textContent.toLowerCase();
-            return (
-              tableText.includes("secondary") ||
-              tableText.includes("collegiate")
-            );
-          }, table);
-
-          // Determine if it's a French immersion school
-          const isFrenchImmersion =
-            name.toLowerCase().includes("école") ||
-            name.toLowerCase().includes("french") ||
-            (await page.evaluate((cell) => {
-              const cellText = cell.textContent;
-              return cellText.includes("*") || cellText.includes("French");
-            }, cell));
-
-          // Visit the school's page to get additional details
-          await page.goto(url, { waitUntil: "networkidle0" });
-
-          // Try to get address and phone from the school's page
-          let address = "";
-          let phone = "";
-
-          try {
-            const addressElement = await page.$(".address");
-            if (addressElement) {
-              address = await page.evaluate(
-                (el) => el.textContent.trim(),
-                addressElement
-              );
-            }
-
-            const phoneElement = await page.$(".phone");
-            if (phoneElement) {
-              phone = await page.evaluate(
-                (el) => el.textContent.trim(),
-                phoneElement
-              );
-            }
-          } catch (err) {
-            console.log(`Could not get details for ${name}: ${err.message}`);
-          }
-
-          schools.push({
-            name,
-            address,
-            phone,
-            url,
-            type: isHighSchool ? "High School" : "Elementary School",
-            isFrenchImmersion,
-            board: "Public",
-            principal: "", // Will be left empty as requested
-            superintendent: "", // Will be left empty as requested
+    // Helper to extract school info from a table
+    async function extractSchoolsFromTable(tableSelector, type) {
+      return await page.$$eval(tableSelector, (tables, type) => {
+        // Each table row contains one or two schools (in <td>s)
+        const schools = [];
+        tables.forEach(table => {
+          const rows = Array.from(table.querySelectorAll('tr'));
+          rows.forEach(row => {
+            const tds = Array.from(row.querySelectorAll('td'));
+            tds.forEach(td => {
+              // Find the <a> tag (school link)
+              const a = td.querySelector('a');
+              if (a) {
+                let name = a.textContent.trim();
+                let url = a.href;
+                let rest = td.textContent.replace(name, '').trim();
+                // Check for asterisk(s) after the name
+                let status = 'English only';
+                if (/\*\*/.test(rest)) {
+                  status = 'French Immersion only';
+                } else if (/\*/.test(rest)) {
+                  status = 'English and French available';
+                }
+                schools.push({
+                  name,
+                  url,
+                  type,
+                  frenchStatus: status
+                });
+              }
+            });
           });
+        });
+        return schools;
+      }, type);
+    }
 
-          // Go back to the main page
-          await page.goto(
-            "https://www.spsd.sk.ca/Schools/Pages/default.aspx#/=",
-            { waitUntil: "networkidle0" }
-          );
-          await page.waitForSelector(".ms-rteTable-1");
-        } catch (err) {
-          console.error(`Error scraping public school cell: ${err.message}`);
-          continue;
+    // The first .ms-rteTable-1 is elementary, the second is high school
+    const tables = await page.$$('.ms-rteTable-1');
+    let elementarySchools = [];
+    let highSchools = [];
+    if (tables.length >= 2) {
+      elementarySchools = await extractSchoolsFromTable('.ms-rteTable-1:nth-of-type(1)', 'Elementary');
+      highSchools = await extractSchoolsFromTable('.ms-rteTable-1:nth-of-type(2)', 'High School');
+    }
+    const allSchools = [...elementarySchools, ...highSchools];
+
+    // Now visit each school page for address, phone, email
+    for (const school of allSchools) {
+      try {
+        await page.goto(school.url, { waitUntil: "networkidle0", timeout: 30000 });
+        await delay(1000);
+        let address = "";
+        let phone = "";
+        let email = "";
+        try {
+          const paragraphs = await page.$$eval('p', ps => ps.map(p => p.textContent.trim()));
+          for (const text of paragraphs) {
+            if (!address && /\d+\s+\w+/.test(text) && /Saskatoon/i.test(text)) address = text;
+            if (!phone && /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(text)) phone = text;
+            if (!email && /@/.test(text)) email = text;
+          }
+        } catch (error) {
+          console.log(`Error getting details for ${school.name}: ${error.message}`);
         }
+        schools.push({
+          name: school.name,
+          type: school.type,
+          category: "Public",
+          frenchStatus: school.frenchStatus,
+          address,
+          phone,
+          email,
+          url: school.url,
+          principal: "",
+          superintendent: ""
+        });
+      } catch (error) {
+        console.log(`Error processing school page for ${school.name}: ${error.message}`);
+        continue;
       }
     }
-  } catch (err) {
-    console.error(`Error scraping public schools: ${err.message}`);
+  } catch (error) {
+    console.log(`Error scraping public schools: ${error.message}`);
   }
-
   return schools;
 }
 
@@ -122,171 +127,231 @@ async function scrapeCatholicSchools(page) {
   const schools = [];
 
   try {
-    await page.goto("https://www.gscs.ca/page/63/find-a-school", {
-      waitUntil: "networkidle0",
+    // Set user agent and other headers
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    );
+    await page.setExtraHTTPHeaders({
+      "Accept-Language": "en-US,en;q=0.9",
+      Accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     });
 
-    // Wait for the school list table to load
-    await page.waitForSelector(".cifs_listview table.table");
+    // Navigate to the Catholic schools directory
+    await page.goto("https://www.gscs.ca/page/63/find-a-school", {
+      waitUntil: "networkidle0",
+      timeout: 60000,
+    });
 
-    // Get all school rows
-    const schoolRows = await page.$$(".cifs_listview table.table tbody tr");
+    // Wait for the school list to load
+    await page.waitForSelector(".cifs_listview table.table", {
+      timeout: 30000,
+    });
 
-    for (const row of schoolRows) {
+    // Get all school links
+    const links = await page.$$(".cifs_listview table.table a");
+
+    for (const link of links) {
       try {
-        // Extract school name and URL
-        const nameElement = await row.$(".rowtitle a");
-        const name = await page.evaluate(
-          (el) => el.textContent.trim(),
-          nameElement
-        );
-        const url = await page.evaluate((el) => el.href, nameElement);
+        // Get school name and URL
+        const name = await page.evaluate((el) => el.textContent.trim(), link);
+        const url = await page.evaluate((el) => el.href, link);
 
-        // Extract address
-        const addressElement = await row.$("td:nth-child(2) a");
-        const address = await page.evaluate(
-          (el) => el.textContent.trim(),
-          addressElement
-        );
+        // Skip if not a school link
+        if (!name || !url) continue;
 
-        // Extract phone
-        const phoneElement = await row.$("td:nth-child(3)");
-        const phone = await page.evaluate(
-          (el) => el.textContent.trim(),
-          phoneElement
-        );
-
-        // Determine if it's a high school based on the name
+        // Determine if it's a high school or French immersion
         const isHighSchool = name.toLowerCase().includes("high school");
+        const isFrenchImmersion = name
+          .toLowerCase()
+          .includes("french immersion");
 
-        // Determine if it's a French immersion school
-        const isFrenchImmersion =
-          name.toLowerCase().includes("école") ||
-          name.toLowerCase().includes("french");
+        // Visit the school's page
+        await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
+        await delay(1000); // Add delay between requests
+
+        // Get address and phone
+        let address = "";
+        let phone = "";
+        let email = "";
+
+        try {
+          const addressElement = await page.$(".address");
+          if (addressElement) {
+            address = await page.evaluate(
+              (el) => el.textContent.trim(),
+              addressElement
+            );
+          }
+
+          const phoneElement = await page.$(".phone");
+          if (phoneElement) {
+            phone = await page.evaluate(
+              (el) => el.textContent.trim(),
+              phoneElement
+            );
+          }
+
+          const emailElement = await page.$(".email");
+          if (emailElement) {
+            email = await page.evaluate(
+              (el) => el.textContent.trim(),
+              emailElement
+            );
+          }
+        } catch (error) {
+          console.log(`Error getting details for ${name}: ${error.message}`);
+        }
 
         schools.push({
           name,
+          type: isHighSchool ? "High School" : "Elementary",
+          isFrenchImmersion,
           address,
           phone,
+          email,
           url,
-          type: isHighSchool ? "High School" : "Elementary School",
-          isFrenchImmersion,
-          board: "Catholic",
-          principal: "", // Will be left empty as requested
-          superintendent: "", // Will be left empty as requested
+          principal: "", // Leave empty as requested
+          superintendent: "", // Leave empty as requested
         });
-      } catch (err) {
-        console.error(`Error scraping Catholic school row: ${err.message}`);
+
+        // Go back to the main page
+        await page.goto("https://www.gscs.ca/page/63/find-a-school", {
+          waitUntil: "networkidle0",
+          timeout: 30000,
+        });
+        await delay(1000); // Add delay between requests
+      } catch (error) {
+        console.log(`Error processing school link: ${error.message}`);
         continue;
       }
     }
-  } catch (err) {
-    console.error(`Error scraping Catholic schools: ${err.message}`);
+  } catch (error) {
+    console.log(`Error scraping Catholic schools: ${error.message}`);
   }
 
   return schools;
 }
 
-async function scrapePrivateSchools(page) {
+async function scrapePrivateSchools(page, existingSchools) {
+  console.log("Scraping private schools...");
   const schools = [];
 
   try {
-    // Navigate to Google search for private schools in Saskatoon
-    await page.goto(
-      "https://www.google.com/search?q=private+schools+in+saskatoon"
+    // Set user agent and other headers
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     );
-
-    // Wait for search results to load
-    await page.waitForSelector("#search");
-
-    const searchResults = await page.evaluate(() => {
-      const results = document.querySelectorAll("#search .g");
-      const schools = [];
-
-      results.forEach((result) => {
-        const title = result.querySelector("h3")?.textContent.trim() || "";
-        const link = result.querySelector("a")?.href || "";
-        const snippet =
-          result.querySelector(".VwiC3b")?.textContent.trim() || "";
-
-        // Only include if it looks like a school and isn't already in our list
-        if (
-          title.toLowerCase().includes("school") &&
-          !existingSchoolNames.includes(title.toLowerCase())
-        ) {
-          schools.push({
-            category: "Private",
-            level: "Both", // We'll need to determine this from the school's website
-            name: title,
-            address: "", // We'll need to get this from the school's website
-            website: link,
-            phone: "", // We'll need to get this from the school's website
-            email: "",
-            principal: "",
-            superintendent: "",
-            contactPerson: "",
-          });
-        }
-      });
-
-      return schools;
+    await page.setExtraHTTPHeaders({
+      "Accept-Language": "en-US,en;q=0.9",
+      Accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     });
 
-    // Visit each private school's website to get more details
-    for (let school of schools) {
+    // Navigate to Google
+    await page.goto(
+      "https://www.google.com/search?q=private+schools+in+saskatoon",
+      {
+        waitUntil: "networkidle0",
+        timeout: 30000,
+      }
+    );
+
+    // Wait for search results
+    await page.waitForSelector("div.g", { timeout: 30000 });
+
+    // Get all search results
+    const results = await page.$$("div.g");
+
+    for (const result of results) {
       try {
-        await page.goto(school.website);
+        const title = await page.evaluate(
+          (el) => el.querySelector("h3")?.textContent.trim(),
+          result
+        );
+        const url = await page.evaluate(
+          (el) => el.querySelector("a")?.href,
+          result
+        );
 
-        // Try to find address and phone
-        const details = await page.evaluate(() => {
-          const address =
-            document.querySelector("address")?.textContent.trim() || "";
-          const phone =
-            document.querySelector("a[href^='tel:']")?.textContent.trim() || "";
-          return { address, phone };
-        });
+        if (!title || !url) continue;
 
-        school.address = details.address;
-        school.phone = details.phone;
+        // Check if it's a school and not already in our list
+        if (
+          title.toLowerCase().includes("school") &&
+          !existingSchools.some(
+            (school) => school.name.toLowerCase() === title.toLowerCase()
+          )
+        ) {
+          // Visit the school's website
+          await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
+          await delay(1000); // Add delay between requests
+
+          // Try to get address and phone
+          let address = "";
+          let phone = "";
+
+          try {
+            // Look for common patterns in the page content
+            const content = await page.content();
+            const addressMatch = content.match(
+              /\d+\s+[A-Za-z\s,]+(?:Street|Avenue|Road|Drive|Boulevard|Lane|Way|Place|Court|Crescent|Circle|Terrace|Trail|Parkway|Square|Plaza|Heights|Gardens|Manor|Village|Estates|Hills|Valley|Meadows|Woods|Grove|Haven|Point|Bay|Harbour|Cove|Creek|River|Lake|Mountain|Ridge|Summit|Peak|View|Vista|Heights|Gardens|Manor|Village|Estates|Hills|Valley|Meadows|Woods|Grove|Haven|Point|Bay|Harbour|Cove|Creek|River|Lake|Mountain|Ridge|Summit|Peak|View|Vista)/i
+            );
+            if (addressMatch) {
+              address = addressMatch[0].trim();
+            }
+
+            const phoneMatch = content.match(
+              /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/
+            );
+            if (phoneMatch) {
+              phone = phoneMatch[0].trim();
+            }
+          } catch (error) {
+            console.log(`Error getting details for ${title}: ${error.message}`);
+          }
+
+          schools.push({
+            name: title,
+            type: "Private",
+            isFrenchImmersion: false,
+            address,
+            phone,
+            email: "", // Leave empty as requested
+            url,
+            principal: "", // Leave empty as requested
+            superintendent: "", // Leave empty as requested
+          });
+        }
       } catch (error) {
-        console.error(`Error scraping details for ${school.name}:`, error);
+        console.log(`Error processing search result: ${error.message}`);
+        continue;
       }
     }
-  } catch (err) {
-    console.error(`Error scraping private schools: ${err.message}`);
+  } catch (error) {
+    console.log(`Error scraping private schools: ${error.message}`);
   }
 
   return schools;
 }
 
 async function main() {
-  let browser;
+  console.log("Starting to scrape school data...");
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
   try {
-    console.log("Starting to scrape school data...");
-
-    // Initialize browser
-    browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
     const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(60000);
 
-    // Set a longer timeout for navigation
-    page.setDefaultNavigationTimeout(60000);
+    // Only scrape public schools for now
+    const publicSchools = await scrapePublicSchools(page);
+    // const catholicSchools = await scrapeCatholicSchools(page);
+    // const privateSchools = await scrapePrivateSchools(page, publicSchools);
 
-    // Scrape schools from all sources
-    const [publicSchools, catholicSchools, privateSchools] = await Promise.all([
-      scrapePublicSchools(page),
-      scrapeCatholicSchools(page),
-      scrapePrivateSchools(page),
-    ]);
-
-    // Combine all schools
-    const allSchools = [
-      ...publicSchools,
-      ...catholicSchools,
-      ...privateSchools,
-    ];
+    const allSchools = [...publicSchools /*, ...catholicSchools, ...privateSchools */];
 
     // Save to Excel
     const workbook = new ExcelJS.Workbook();
@@ -294,33 +359,31 @@ async function main() {
 
     // Add headers
     worksheet.columns = [
-      { header: "Name", key: "name", width: 40 },
+      { header: "Name", key: "name", width: 30 },
       { header: "Type", key: "type", width: 15 },
-      { header: "Board", key: "board", width: 15 },
-      { header: "Address", key: "address", width: 50 },
+      { header: "Category", key: "category", width: 15 },
+      { header: "French Status", key: "frenchStatus", width: 15 },
+      { header: "Address", key: "address", width: 40 },
       { header: "Phone", key: "phone", width: 20 },
-      { header: "URL", key: "url", width: 50 },
-      { header: "French Immersion", key: "isFrenchImmersion", width: 15 },
+      { header: "Email", key: "email", width: 30 },
+      { header: "URL", key: "url", width: 40 },
       { header: "Principal", key: "principal", width: 30 },
-      { header: "Superintendent", key: "superintendent", width: 30 },
+      { header: "Superintendent", key: "superintendent", width: 30 }
     ];
 
     // Add rows
     worksheet.addRows(allSchools);
 
     // Save the file
-    const outputPath = path.join(__dirname, "schools.xlsx");
+    const outputPath = "schools.xlsx";
     await workbook.xlsx.writeFile(outputPath);
 
     console.log(`Successfully scraped ${allSchools.length} schools`);
-    console.log(`Data saved to ${outputPath}`);
-  } catch (err) {
-    console.error("Error scraping schools:", err);
-    process.exit(1);
+    console.log(`Data saved to ${process.cwd()}/${outputPath}`);
+  } catch (error) {
+    console.error("Error:", error);
   } finally {
-    if (browser) {
-      await browser.close();
-    }
+    await browser.close();
     process.exit(0);
   }
 }
