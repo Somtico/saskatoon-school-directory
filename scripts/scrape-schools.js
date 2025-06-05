@@ -69,6 +69,7 @@ const highSchoolsRaw = [
 
 const removeGeneralWords = (name) =>
   name
+    .replace(/^école|^ecole/gi, "") // remove 'École' or 'Ecole' at the start
     .replace(/school|community|collegiate|elementary/gi, "")
     .replace(/\s+/g, "")
     .normalize("NFD")
