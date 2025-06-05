@@ -88,18 +88,16 @@ async function getContactDetails(page, url) {
   try {
     await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
     await delay(1000);
-    // Try to extract address, phone, email from the contact page
+    // Extract address, phone, email using the provided HTML structure
     const details = await page.evaluate(() => {
-      const text = document.body.innerText;
-      const addressMatch = text.match(/Address:\s*([\s\S]*?)\n/);
-      const phoneMatch = text.match(/Phone:\s*([\d\-() ]+)/);
-      const emailMatch = text.match(
-        /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/
-      );
+      const getText = (selector) => {
+        const el = document.querySelector(selector);
+        return el ? el.textContent.trim().replace(/\s+/g, " ") : "";
+      };
       return {
-        address: addressMatch ? addressMatch[1].trim() : "",
-        phone: phoneMatch ? phoneMatch[1].trim() : "",
-        email: emailMatch ? emailMatch[0].trim() : "",
+        address: getText(".address"),
+        phone: getText(".phone"),
+        email: getText(".email"),
       };
     });
     return details;
@@ -167,15 +165,14 @@ async function main() {
 
     // Add headers
     worksheet.columns = [
-      { header: "Name", key: "Name", width: 30 },
       { header: "Type", key: "Type", width: 15 },
       { header: "Category", key: "Category", width: 15 },
       { header: "French Status", key: "French Status", width: 20 },
+      { header: "Name", key: "Name", width: 30 },
       { header: "Address", key: "Address", width: 40 },
+      { header: "URL", key: "URL", width: 40 },
       { header: "Phone", key: "Phone", width: 20 },
       { header: "Email", key: "Email", width: 30 },
-      { header: "URL", key: "URL", width: 40 },
-      { header: "Principal", key: "Principal", width: 30 },
     ];
 
     // Add rows
