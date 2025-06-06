@@ -202,15 +202,10 @@ async function main() {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const excelFilePath = path.join(
       __dirname,
-      `public-schools-${timestamp}.xlsx`
+      `${getSchoolType(schools[0].name)}-schools-${timestamp}.xlsx`
     );
     await workbook.xlsx.writeFile(excelFilePath);
-    console.log(`Data saved to ${excelFilePath}`);
-
-    // Also save as JSON for backup
-    const jsonPath = path.join(__dirname, `catholic-schools-${timestamp}.json`);
-    fs.writeFileSync(jsonPath, JSON.stringify(schoolDetails, null, 2));
-    console.log(`Data also saved to ${jsonPath}`);
+    console.log(`\nData has been saved to: ${excelFilePath}`);
 
     // Open the file
     openFile(excelFilePath);
