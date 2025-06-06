@@ -61,11 +61,59 @@ const catholicSchools = [
 ];
 
 const urlOverrides = {
-  "École française de Saskatoon": "french",
-  "St. Frances Cree Bilingual School – Bateman": "frances-bateman",
-  "St. Frances Cree Bilingual School - McPherson": "frances-mcpherson",
-  "St. Mary's Wellness and Education Centre": "stmarys",
-  "St. Thérèse of Lisieux Catholic School": "sttherese",
+  "Bethlehem Catholic High School": "BET",
+  "Bishop Filevich Ukrainian Bilingual School": "FIL",
+  "Bishop James Mahoney High School": "BJM",
+  "Bishop Klein Community School": "KLE",
+  "Bishop Murray High School": "BMH",
+  "Bishop Pocock School": "POC",
+  "Bishop Roborecki Community School": "ROB",
+  "Cyber School": "cyb",
+  "E. D. Feehan Catholic High School": "EDF",
+  "École Cardinal Leger School": "LEG",
+  "École Father Robinson School": "RBI",
+  "École française de Saskatoon": "FRE",
+  "École Holy Mary Catholic School": "HMA",
+  "École Sister O'Brien School": "OBR",
+  "École St. Gerard School": "GER",
+  "École St. Luke School": "LUK",
+  "École St. Matthew School": "MAT",
+  "École St. Mother Teresa School": "TER",
+  "École St. Paul School": "PAU",
+  "École St. Peter School": "PET",
+  "Father Vachon School": "VAC",
+  "Georges Vanier Catholic Fine Arts School": "VAN",
+  "Holy Cross High School": "HCH",
+  "Holy Family Catholic School": "FAM",
+  "Holy Trinity Catholic School": "HTR",
+  "International Student Program": "ISP",
+  "Oskāyak High School": "OSK",
+  "Pope John Paul II School": "JP2",
+  "St. Angela School": "ANG",
+  "St. Anne School": "ANN",
+  "St. Augustine School": "AUG",
+  "St. Augustine School - Humboldt": "HAU",
+  "St. Bernard School": "BER",
+  "St. Dominic School": "DOM",
+  "St. Dominic School - Humboldt": "HDO",
+  "St. Edward School": "EDW",
+  "St. Frances Cree Bilingual School – Bateman": "frb",
+  "St. Frances Cree Bilingual School - McPherson": "fra",
+  "St. Gabriel Biggar": "BGA",
+  "St. George School": "GEO",
+  "St. John Community School": "JOH",
+  "St. Joseph High School": "JOS",
+  "St. Kateri Tekakwitha Catholic School": "kat",
+  "St. Lorenzo Ruiz Catholic School": "lor",
+  "St. Marguerite School": "MAG",
+  "St. Maria Goretti Community School": "GOR",
+  "St. Mark Community School": "MAK",
+  "St. Mary's Wellness and Education Centre": "MRY",
+  "St. Michael Community School": "MIC",
+  "St. Nicholas Catholic School": "nic",
+  "St. Philip School": "PHI",
+  "St. Thérèse of Lisieux Catholic School": "the",
+  "St. Volodymyr School": "VOL",
 };
 
 const removeGeneralWords = (name) =>
@@ -109,17 +157,20 @@ async function getContactDetails(page, url) {
         getText(".address") ||
         getText("[itemprop='address']") ||
         getText(".contact-address") ||
-        getText(".school-address");
+        getText(".school-address") ||
+        getText(".school-info .address");
       const phone =
         getText(".phone") ||
         getText("[itemprop='telephone']") ||
         getText(".contact-phone") ||
-        getText(".school-phone");
+        getText(".school-phone") ||
+        getText(".school-info .phone");
       const email =
         getText(".email") ||
         getText("[itemprop='email']") ||
         getText(".contact-email") ||
-        getText(".school-email");
+        getText(".school-email") ||
+        getText(".school-info .email");
 
       return { address, phone, email };
     });
@@ -139,8 +190,8 @@ async function scrapeCatholicSchools(browser) {
   page.setDefaultNavigationTimeout(60000);
 
   for (const name of catholicSchools) {
-    const urlSegment = urlOverrides[name] || removeGeneralWords(name);
-    const url = `https://www.gscs.ca/schools/${urlSegment}`;
+    const urlCode = urlOverrides[name];
+    const url = `https://www.gscs.ca/${urlCode}`;
     const schoolType = getSchoolType(name);
     const frenchStatus = getFrenchStatus(name);
 
