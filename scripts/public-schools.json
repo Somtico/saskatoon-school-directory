@@ -1,0 +1,524 @@
+[
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "École Alvin Buckwold School",
+    "contactPageUrl": "715 East Drive, Saskatoon, SK, S7J 2X8",
+    "type": "https://www.spsd.sk.ca/school/alvinbuckwold/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7100"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "John Lake School",
+    "contactPageUrl": "2606 Broadway Avenue, Saskatoon, SK, S7J 0Z6",
+    "type": "https://www.spsd.sk.ca/school/johnlake/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7300"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Brevoort Park School",
+    "contactPageUrl": "2809 Early Drive, Saskatoon, SK, S7H 3K4",
+    "type": "https://www.spsd.sk.ca/school/brevoort/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7110"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "King George Community School",
+    "contactPageUrl": "721 Avenue K South, Saskatoon, SK, S7M 2E7",
+    "type": "https://www.spsd.sk.ca/school/kinggeorge/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7310"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Brownell School",
+    "contactPageUrl": "274 Russell Road, Saskatoon, SK, S7K 7E1",
+    "type": "https://www.spsd.sk.ca/school/brownell/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7120"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Lakeridge School",
+    "contactPageUrl": "305 Waterbury Road, Saskatoon, SK, S7J 4Z7",
+    "type": "https://www.spsd.sk.ca/school/lakeridge/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7320"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Brunskill School",
+    "contactPageUrl": "101 Wiggins Ave S, Saskatoon, SK, S7N 1K3",
+    "type": "https://www.spsd.sk.ca/school/brunskill/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7130"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "École Lakeview School",
+    "contactPageUrl": "527 Kingsmere Blvd, Saskatoon, SK, S7J 3V4",
+    "type": "https://www.spsd.sk.ca/school/lakeview/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7330"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Buena Vista School",
+    "contactPageUrl": "1306 Lorne Avenue, Saskatoon, SK, S7H 1X8",
+    "type": "https://www.spsd.sk.ca/school/buenavista/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7140"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Lawson Heights School",
+    "contactPageUrl": "430 Redberry Road, Saskatoon, SK, S7K 5H6",
+    "type": "https://www.spsd.sk.ca/school/lawsonheights/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7340"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Caroline Robins Community School",
+    "contactPageUrl": "1410 Byers Crescent, Saskatoon, SK, S7L 4H3",
+    "type": "https://www.spsd.sk.ca/school/carolinerobins/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7150"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Lester B. Pearson School",
+    "contactPageUrl": "3620 Centennial Drive, Saskatoon, SK, S7L 5L2",
+    "type": "https://www.spsd.sk.ca/school/lesterbpearson/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7350"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Caswell Community School",
+    "contactPageUrl": "204 - 30th Street West, Saskatoon, SK, S7L 0N9",
+    "type": "https://www.spsd.sk.ca/school/caswell/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7160"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Mayfair Community School",
+    "contactPageUrl": "510 34th Street West, Saskatoon, SK, S7L 0Y2",
+    "type": "https://www.spsd.sk.ca/school/mayfair/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7360"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Charles Red Hawk Elementary School",
+    "contactPageUrl": "182 Chief Whitecap Trail, Whitecap, SK, S7K 2L2",
+    "type": "https://www.spsd.sk.ca/school/charlesredhawk/Contact/Pages/default.aspx#/=",
+    "language": "306.477.2063"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Montgomery School",
+    "contactPageUrl": "3220 Ortona Street, Saskatoon, SK, S7M 3R6",
+    "type": "https://www.spsd.sk.ca/school/montgomery/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7370"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Chief Whitecap School",
+    "contactPageUrl": "812 Gordon Road, Saskatoon, SK, S7T 0J5",
+    "type": "https://www.spsd.sk.ca/school/chiefwhitecap/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7640"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "North Park Wilson School",
+    "contactPageUrl": "1505 9th Avenue North, Saskatoon, SK, S7K 2Z8",
+    "type": "https://www.spsd.sk.ca/school/northparkwilson/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7380"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "City Park School",
+    "contactPageUrl": "820 9th Avenue North, Saskatoon, SK, S7K 2Z2",
+    "type": "https://www.spsd.sk.ca/school/citypark/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7550"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Prince Philip School",
+    "contactPageUrl": "1715 Drinkle Street, Saskatoon, SK, S7J 0P8",
+    "type": "https://www.spsd.sk.ca/school/princephilip/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7400"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Colette Bourgonje School",
+    "contactPageUrl": "169 Olson Lane West, Saskatoon, SK, S7V 0L1",
+    "type": "https://www.spsd.sk.ca/school/colettebourgonje/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7530"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Queen Elizabeth School",
+    "contactPageUrl": "1905 Eastlake Avenue, Saskatoon, SK, S7J 0W9",
+    "type": "https://www.spsd.sk.ca/school/queenelizabeth/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7420"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "École College Park School",
+    "contactPageUrl": "3440 Harrington Street, Saskatoon, SK, S7H 3Y4",
+    "type": "https://www.spsd.sk.ca/school/collegepark/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7170"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "École River Heights School",
+    "contactPageUrl": "60 Ravine Drive, Saskatoon, SK, S7K 1E2",
+    "type": "https://www.spsd.sk.ca/school/riverheights/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7430"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Dr. John G. Egnatoff School",
+    "contactPageUrl": "225 Kenderdine Road, Saskatoon, SK, S7N 3V2",
+    "type": "https://www.spsd.sk.ca/school/drjohngegnatoff/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7190"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Roland Michener School",
+    "contactPageUrl": "4215 DeGeer Street, Saskatoon, SK, S7H 4N6",
+    "type": "https://www.spsd.sk.ca/school/rolandmichener/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7440"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "École Dundonald School",
+    "contactPageUrl": "162 Wedge Road, Saskatoon, SK, S7L 6Y4",
+    "type": "https://www.spsd.sk.ca/school/dundonald/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7200"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "École Silverspring School",
+    "contactPageUrl": "610 Konihowski Road, Saskatoon, SK, S7S 1M5",
+    "type": "https://www.spsd.sk.ca/school/silverspring/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7900"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Ernest Lindner School",
+    "contactPageUrl": "1087 Hampton Circle, Saskatoon, SK, S7R 0G7",
+    "type": "https://www.spsd.sk.ca/school/ernestlindner/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7560"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Silverwood Heights School",
+    "contactPageUrl": "403 Silverwood Road, Saskatoon, SK, S7K 6G1",
+    "type": "https://www.spsd.sk.ca/school/silverwoodheights/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7450"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Fairhaven School",
+    "contactPageUrl": "495 Forrester Road, Saskatoon, SK, S7M 4P7",
+    "type": "https://www.spsd.sk.ca/school/fairhaven/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7210"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Sutherland Community School",
+    "contactPageUrl": "211 - 111th Street, Saskatoon, SK, S7N 3A3",
+    "type": "https://www.spsd.sk.ca/school/sutherland/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7460"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "École Forest Grove School",
+    "contactPageUrl": "501 - 115th Street East, Saskatoon, SK, S7N 2X9",
+    "type": "https://www.spsd.sk.ca/school/forestgrove/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7220"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Sylvia Fedoruk School",
+    "contactPageUrl": "628 Manek Road, Saskatoon, SK, S7W 0W3",
+    "type": "https://www.spsd.sk.ca/school/sylviafedoruk/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7520"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Greystone Heights School",
+    "contactPageUrl": "2721 Main Street, Saskatoon, SK, S7H 0M2",
+    "type": "https://www.spsd.sk.ca/school/greystoneheights/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7230"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "French Immersion only",
+    "email": "École Victoria School",
+    "contactPageUrl": "639 Broadway Avenue, Saskatoon, SK, S7N 1B2",
+    "type": "https://www.spsd.sk.ca/school/victoria/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7470"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "French Immersion only",
+    "email": "École Henry Kelsey School",
+    "contactPageUrl": "16 Valens Drive, Saskatoon, SK, S7L 3S1",
+    "type": "https://www.spsd.sk.ca/school/henrykelsey/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7240"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Vincent Massey Community School",
+    "contactPageUrl": "1001 Northumberland Avenue, Saskatoon, SK, S7L 3W8",
+    "type": "https://www.spsd.sk.ca/school/vincentmassey/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7480"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Holliston School",
+    "contactPageUrl": "1511 Louise Avenue, Saskatoon, SK, S7H 2R2",
+    "type": "https://www.spsd.sk.ca/school/holliston/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7250"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "wâhkôhtowin Community School",
+    "contactPageUrl": "3555 miyo-wâhkôhtowin Road, Saskatoon, SK, S7L 4R9",
+    "type": "https://www.spsd.sk.ca/school/wahkohtowin/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7180"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Howard Coad Community School",
+    "contactPageUrl": "431 Avenue T North, Saskatoon, SK, S7L 3B5",
+    "type": "https://www.spsd.sk.ca/school/howardcoad/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7260"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Westmount Community School",
+    "contactPageUrl": "411 Avenue J North, Saskatoon, SK, S7L 2K4",
+    "type": "https://www.spsd.sk.ca/school/westmount/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7490"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Hugh Cairns School",
+    "contactPageUrl": "2621 Cairns Avenue, Saskatoon, SK, S7J 1V8",
+    "type": "https://www.spsd.sk.ca/school/hughcairns/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7270"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Wildwood School",
+    "contactPageUrl": "203 Rosedale Road, Saskatoon, SK, S7H 5H1",
+    "type": "https://www.spsd.sk.ca/school/wildwood/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7500"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "James L. Alexander School",
+    "contactPageUrl": "427 McCormack Road, Saskatoon, SK, S7M 5L8",
+    "type": "https://www.spsd.sk.ca/school/jameslalexander/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7280"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Willowgrove School",
+    "contactPageUrl": "805 Stensrud Road, Saskatoon, SK, S7W 0M9",
+    "type": "https://www.spsd.sk.ca/school/willowgrove/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7970"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "John Dolan School",
+    "contactPageUrl": "3144 Arlington Avenue, Saskatoon, SK, S7J 3L5",
+    "type": "https://www.spsd.sk.ca/school/johndolan/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7290"
+  },
+  {
+    "name": "Elementary",
+    "address": "Public",
+    "phone": "English only",
+    "email": "W.P. Bate Community School",
+    "contactPageUrl": "2515 18th Street West, Saskatoon, SK, S7M 4A9",
+    "type": "https://www.spsd.sk.ca/school/wpbate/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7510"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Aden Bowman Collegiate",
+    "contactPageUrl": "1904 Clarence Avenue South, Saskatoon, SK, S7J 1L3",
+    "type": "https://www.spsd.sk.ca/school/adenbowman/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7600"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "Marion M. Graham Collegiate",
+    "contactPageUrl": "602 Lenore Drive, Saskatoon, SK, S7K 6A6",
+    "type": "https://www.spsd.sk.ca/school/marionmgraham/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7750"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Bedford Road Collegiate",
+    "contactPageUrl": "722 Bedford Road, Saskatoon, SK, S7L 0G2",
+    "type": "https://www.spsd.sk.ca/school/bedfordroad/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7650"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Mount Royal Collegiate",
+    "contactPageUrl": "2220 Rusholme Road, Saskatoon, SK, S7L 4A4",
+    "type": "https://www.spsd.sk.ca/school/mountroyal/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7800"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "Centennial Collegiate",
+    "contactPageUrl": "160 Nelson Road, Saskatoon, SK, S7S 1P5",
+    "type": "https://www.spsd.sk.ca/school/centennial/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7950"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Nutana Collegiate",
+    "contactPageUrl": "411 - 11th Street East, Saskatoon, SK, S7N 0E9",
+    "type": "https://www.spsd.sk.ca/school/nutana/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7580"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Estey School",
+    "contactPageUrl": "441 Witney Avenue North, Saskatoon, SK, S7L 3M6",
+    "type": "https://www.spsd.sk.ca/school/esteyschool/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7540"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "Tommy Douglas Collegiate",
+    "contactPageUrl": "130 Bowlt Crescent, Saskatoon, SK, S7M 0L1",
+    "type": "https://www.spsd.sk.ca/school/tommydouglas/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7910"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English only",
+    "email": "Evan Hardy Collegiate",
+    "contactPageUrl": "605 Acadia Drive, Saskatoon, SK, S7H 3V8",
+    "type": "https://www.spsd.sk.ca/school/evanhardy/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7700"
+  },
+  {
+    "name": "High School",
+    "address": "Public",
+    "phone": "English and French",
+    "email": "Walter Murray Collegiate",
+    "contactPageUrl": "1905 Preston Avenue, Saskatoon, SK, S7J 2E7",
+    "type": "https://www.spsd.sk.ca/school/waltermurray/Contact/Pages/default.aspx#/=",
+    "language": "306-683-7850"
+  }
+]
