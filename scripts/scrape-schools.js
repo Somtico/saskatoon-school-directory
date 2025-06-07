@@ -10,15 +10,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Helper function to play notification sound
 function playNotificationSound() {
-  if (platform() === "win32") {
-    exec('powershell -c "[console]::beep(1000,500)"');
-  } else if (platform() === "darwin") {
-    exec("afplay /System/Library/Sounds/Glass.aiff");
-  } else {
-    exec(
-      "paplay /usr/share/sounds/freedesktop/stereo/complete.oga || aplay /usr/share/sounds/alsa/Front_Center.wav || beep"
-    );
-  }
+  console.log("\u0007"); // This will play the system notification sound
 }
 
 // Helper function to open file
@@ -60,61 +52,32 @@ const getFrenchStatus = (name) => {
   return "English";
 };
 
-async function getContactDetails(page, url) {
+// Helper to extract phone numbers and emails from text
+function extractPhonesAndEmails(text) {
+  const phones = Array.from(text.matchAll(/(306[-.\s]?\d{3}[-.\s]?\d{4})/g)).map(m => m[0]);
+  const emails = Array.from(text.matchAll(/[\w.-]+@[\w.-]+\.[A-Za-z]{2,}/g)).map(m => m[0]);
+  return { phones, emails };
+}
+
+async function getContactInfoFromUrl(page, url) {
   try {
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await delay(2000);
-
-    // 1. Find the Contact Us link in the main navigation
-    const contactHref = await page.evaluate(() => {
-      const nav = document.querySelector(".main-nav");
-      if (!nav) return null;
-      const links = nav.querySelectorAll("a");
-      for (const link of links) {
-        if (
-          link.textContent &&
-          link.textContent.toLowerCase().includes("contact")
-        ) {
-          return link.getAttribute("href");
-        }
-      }
-      return null;
+    await page.goto(url, { waitUntil: "networkidle0" });
+    const phones = await page.evaluate(() => {
+      const text = document.body.innerText;
+      const phoneRegex = /(?:^|\D)(\d{3}[-.]?\d{3}[-.]?\d{4})(?:\D|$)/g;
+      const matches = [...text.matchAll(phoneRegex)];
+      return [...new Set(matches.map((m) => m[1]))];
     });
-
-    if (!contactHref) {
-      console.warn(`No contact link found on ${url}`);
-      return { address: "", phone: "", email: "", contactPageUrl: "" };
-    }
-
-    const contactUrl = new URL(contactHref, url).toString();
-    await page.goto(contactUrl, { waitUntil: "networkidle2" });
-
-    // 4. Extract contact info from the contact page
-    const details = await page.evaluate(() => {
-      function getText(selector) {
-        const el = document.querySelector(selector);
-        return el ? el.innerText.trim() : "";
-      }
-      function getPhoneNumber() {
-        const phoneEl = document.querySelector(".ci-contact-list .number");
-        return phoneEl ? phoneEl.innerText.trim() : "";
-      }
-      function getEmailFromLink() {
-        const emailEl = document.querySelector(".contactpg_email a");
-        return emailEl ? emailEl.innerText.trim() : "";
-      }
-      return {
-        address: getText("address"),
-        phone: getPhoneNumber(),
-        email: getEmailFromLink(),
-      };
+    const emails = await page.evaluate(() => {
+      const text = document.body.innerText;
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+      const matches = text.match(emailRegex) || [];
+      return [...new Set(matches)];
     });
-
-    console.log(`Found for ${contactUrl}:`, details);
-    return { ...details, contactPageUrl: contactUrl };
-  } catch (e) {
-    console.error(`Error getting contact details for ${url}:`, e);
-    return { address: "", phone: "", email: "", contactPageUrl: "" };
+    return { contactPageUrl: url, phones, emails };
+  } catch (err) {
+    console.error(`Error getting contact info from ${url}:`, err.message);
+    return { contactPageUrl: url, phones: [], emails: [] };
   }
 }
 
@@ -143,89 +106,179 @@ async function getSchoolList(page) {
   }
 }
 
+// Function to check if a school exists in the list
+function checkExistingSchools(schoolName, existingSchools) {
+  return existingSchools.some(school => 
+    school.name.toLowerCase() === schoolName.toLowerCase()
+  );
+}
+
+// Main function
 async function main() {
   const browser = await puppeteer.launch({
-    headless: false,
-    defaultViewport: null,
-    args: ["--start-maximized"],
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 800 });
+  await page.setDefaultNavigationTimeout(30000); // 30 second timeout
+
+  // Load existing schools data
+  const catholicSchoolsPath = path.join(__dirname, "catholic-schools.json");
+  const publicSchoolsPath = path.join(__dirname, "public-schools.json");
+
+  let existingCatholicSchools = [];
+  let existingPublicSchools = [];
 
   try {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1920, height: 1080 });
+    if (fs.existsSync(catholicSchoolsPath)) {
+      existingCatholicSchools = JSON.parse(
+        fs.readFileSync(catholicSchoolsPath, "utf8")
+      );
+    }
+    if (fs.existsSync(publicSchoolsPath)) {
+      existingPublicSchools = JSON.parse(
+        fs.readFileSync(publicSchoolsPath, "utf8")
+      );
+    }
+  } catch (err) {
+    console.error("Error loading existing schools data:", err);
+  }
 
-    // 1. Get the list of schools
-    const schools = await getSchoolList(page);
-    console.log(`Found ${schools.length} schools`);
+  // Scrape Catholic schools
+  console.log("Scraping Catholic schools...");
+  await page.goto("https://www.gscs.ca/schools", { waitUntil: "networkidle0" });
+  const catholicSchools = await page.evaluate(() => {
+    const schools = [];
+    const schoolElements = document.querySelectorAll(".school-list-item");
+    schoolElements.forEach((element) => {
+      const name = element.querySelector(".school-name")?.textContent.trim();
+      const address = element
+        .querySelector(".school-address")
+        ?.textContent.trim();
+      if (name && address) {
+        schools.push({ name, address });
+      }
+    });
+    return schools;
+  });
 
-    // 2. For each school, follow its link and extract contact info
-    const schoolDetails = [];
-    for (const school of schools) {
-      console.log(`Scraping ${school.name}...`);
-      const details = await getContactDetails(page, school.url);
-      console.log(`Found for ${school.url}:`, details);
-      schoolDetails.push({
-        Type: getSchoolType(school.name),
-        Category: "Catholic",
-        "French Status": getFrenchStatus(school.name),
-        Name: school.name,
-        Address: details.address,
-        URL: school.url,
-        Phone: details.phone,
-        Email: details.email,
-        ContactPageURL: details.contactPageUrl,
+  // Process Catholic schools
+  const processedCatholicSchools = [];
+  for (const school of catholicSchools) {
+    if (!checkExistingSchools(school.name, existingCatholicSchools)) {
+      const { contactPageUrl, phones, emails } = await getContactInfoFromUrl(
+        page,
+        school.contactPageUrl
+      );
+      processedCatholicSchools.push({
+        ...school,
+        phones: phones.join(", "),
+        emails: emails.join(", "),
+        contactPageUrl,
       });
     }
-
-    // 3. Save the data
-    // Save to Excel
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Catholic Schools");
-
-    // Add headers
-    worksheet.columns = [
-      { header: "Type", key: "Type" },
-      { header: "Category", key: "Category" },
-      { header: "French Status", key: "French Status" },
-      { header: "Name", key: "Name" },
-      { header: "Address", key: "Address" },
-      { header: "URL", key: "URL" },
-      { header: "Phone", key: "Phone" },
-      { header: "Email", key: "Email" },
-      { header: "Contact Page URL", key: "ContactPageURL" },
-    ];
-
-    // Add rows
-    worksheet.addRows(schoolDetails);
-
-    // Save the file with a unique name to avoid locking issues
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const schoolType = getSchoolType(schools[0].name);
-    const excelFilePath = path.join(
-      __dirname,
-      `${schoolType}-schools-${timestamp}.xlsx`
-    );
-    await workbook.xlsx.writeFile(excelFilePath);
-    console.log(`\nData has been saved to: ${excelFilePath}`);
-
-    // Also save as JSON for backup
-    const jsonPath = path.join(
-      __dirname,
-      `${schoolType}-schools-${timestamp}.json`
-    );
-    fs.writeFileSync(jsonPath, JSON.stringify(schoolDetails, null, 2));
-    console.log(`Data also saved to ${jsonPath}`);
-
-    // Open the file
-    openFile(excelFilePath);
-
-    // Play notification sound
-    playNotificationSound();
-  } catch (e) {
-    console.error("Error in main:", e);
-  } finally {
-    await browser.close();
   }
+
+  // Save Catholic schools to Excel
+  const catholicWorkbook = new ExcelJS.Workbook();
+  const catholicSheet = catholicWorkbook.addWorksheet("Catholic Schools");
+  catholicSheet.columns = [
+    { header: "Name", key: "name" },
+    { header: "Address", key: "address" },
+    { header: "Phones", key: "phones" },
+    { header: "Emails", key: "emails" },
+    { header: "Contact Page URL", key: "contactPageUrl" },
+  ];
+  processedCatholicSchools.forEach((school) => catholicSheet.addRow(school));
+  const catholicTimestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const catholicExcelPath = path.join(
+    __dirname,
+    `catholic-schools-${catholicTimestamp}.xlsx`
+  );
+  await catholicWorkbook.xlsx.writeFile(catholicExcelPath);
+  console.log(`Catholic schools saved to: ${catholicExcelPath}`);
+
+  // Save Catholic schools to JSON
+  const catholicJsonPath = path.join(
+    __dirname,
+    `catholic-schools-${catholicTimestamp}.json`
+  );
+  fs.writeFileSync(
+    catholicJsonPath,
+    JSON.stringify(processedCatholicSchools, null, 2)
+  );
+  console.log(`Catholic schools saved to: ${catholicJsonPath}`);
+
+  // Scrape public schools
+  console.log("Scraping public schools...");
+  await page.goto("https://www.saskatoonpublicschools.ca/schools", {
+    waitUntil: "networkidle0",
+  });
+  const publicSchools = await page.evaluate(() => {
+    const schools = [];
+    const schoolElements = document.querySelectorAll(".school-list-item");
+    schoolElements.forEach((element) => {
+      const name = element.querySelector(".school-name")?.textContent.trim();
+      const address = element
+        .querySelector(".school-address")
+        ?.textContent.trim();
+      if (name && address) {
+        schools.push({ name, address });
+      }
+    });
+    return schools;
+  });
+
+  // Process public schools
+  const processedPublicSchools = [];
+  for (const school of publicSchools) {
+    if (!checkExistingSchools(school.name, existingPublicSchools)) {
+      const { contactPageUrl, phones, emails } = await getContactInfoFromUrl(
+        page,
+        school.contactPageUrl
+      );
+      processedPublicSchools.push({
+        ...school,
+        phones: phones.join(", "),
+        emails: emails.join(", "),
+        contactPageUrl,
+      });
+    }
+  }
+
+  // Save public schools to Excel
+  const publicWorkbook = new ExcelJS.Workbook();
+  const publicSheet = publicWorkbook.addWorksheet("Public Schools");
+  publicSheet.columns = [
+    { header: "Name", key: "name" },
+    { header: "Address", key: "address" },
+    { header: "Phones", key: "phones" },
+    { header: "Emails", key: "emails" },
+    { header: "Contact Page URL", key: "contactPageUrl" },
+  ];
+  processedPublicSchools.forEach((school) => publicSheet.addRow(school));
+  const publicTimestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const publicExcelPath = path.join(
+    __dirname,
+    `public-schools-${publicTimestamp}.xlsx`
+  );
+  await publicWorkbook.xlsx.writeFile(publicExcelPath);
+  console.log(`Public schools saved to: ${publicExcelPath}`);
+
+  // Save public schools to JSON
+  const publicJsonPath = path.join(
+    __dirname,
+    `public-schools-${publicTimestamp}.json`
+  );
+  fs.writeFileSync(
+    publicJsonPath,
+    JSON.stringify(processedPublicSchools, null, 2)
+  );
+  console.log(`Public schools saved to: ${publicJsonPath}`);
+
+  await browser.close();
+  playNotificationSound();
 }
 
 // Handle uncaught exceptions
@@ -240,4 +293,7 @@ process.on("unhandledRejection", (reason, promise) => {
   process.exit(1);
 });
 
-main();
+main().catch((e) => {
+  console.error("Fatal error in main:", e);
+  process.exit(1);
+});
