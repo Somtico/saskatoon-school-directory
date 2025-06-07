@@ -200,12 +200,21 @@ async function main() {
 
     // Save the file with a unique name to avoid locking issues
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const schoolType = getSchoolType(schools[0].name);
     const excelFilePath = path.join(
       __dirname,
-      `${getSchoolType(schools[0].name)}-schools-${timestamp}.xlsx`
+      `${schoolType}-schools-${timestamp}.xlsx`
     );
     await workbook.xlsx.writeFile(excelFilePath);
     console.log(`\nData has been saved to: ${excelFilePath}`);
+
+    // Also save as JSON for backup
+    const jsonPath = path.join(
+      __dirname,
+      `${schoolType}-schools-${timestamp}.json`
+    );
+    fs.writeFileSync(jsonPath, JSON.stringify(schoolDetails, null, 2));
+    console.log(`Data also saved to ${jsonPath}`);
 
     // Open the file
     openFile(excelFilePath);
